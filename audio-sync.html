@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Sync Playback</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <div class="main-container">
+        <nav class="nav-bar">
+            <a href="index.html" class="nav-link">← Back to Upload</a>
+        </nav>
+
+        <h1>Synchronized Audio Playback</h1>
+
+        <div class="container">
+            <div class="audio-controls">
+                <audio id="audio-player" controls>
+                    Your browser does not support the audio element.
+                </audio>
+                
+                <div class="playback-controls">
+                    <button id="slow-btn" class="control-btn">0.75x</button>
+                    <button id="normal-btn" class="control-btn active">1x</button>
+                    <button id="fast-btn" class="control-btn">1.25x</button>
+                </div>
+
+                <div class="time-controls">
+                    <button id="backward-btn" class="control-btn">-5s</button>
+                    <button id="forward-btn" class="control-btn">+5s</button>
+                </div>
+            </div>
+
+            <div class="transcript-container">
+                <div class="search-bar">
+                    <input type="text" id="search-text" placeholder="Search in transcript...">
+                    <button id="search-btn" class="secondary-btn">Search</button>
+                </div>
+
+                <div id="sync-transcript" class="scrollable-transcript">
+                    <!-- Transcript content will be inserted here -->
+                </div>
+            </div>
+
+            <div class="display-options">
+                <label>
+                    <input type="checkbox" id="auto-scroll"> Auto-scroll
+                </label>
+                <label>
+                    <input type="checkbox" id="show-timestamps"> Show timestamps
+                </label>
+                <label>
+                    <input type="checkbox" id="highlight-speakers"> Highlight speakers
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <script src="./functions/utils.js"></script>
+    <script src="./functions/audio-sync.js"></script>
+</body>
+</html>

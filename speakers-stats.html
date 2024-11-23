@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speaker Statistics</title>
+    <link rel="stylesheet" href="./styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <nav class="nav-bar">
+            <a href="index.html" class="nav-link">← Back to Upload</a>
+        </nav>
+
+        <h1>Speaker Statistics</h1>
+
+        <div class="container">
+            <div class="chart-container">
+                <canvas id="speakingTimeChart"></canvas>
+            </div>
+
+            <div id="speaker-details" class="speaker-grid">
+                <!-- Speaker cards will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="./functions/utils.js"></script>
+    <script src="./functions/speaker-stats.js"></script>
+</body>
+</html>

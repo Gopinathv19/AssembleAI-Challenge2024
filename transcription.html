@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transcription View</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <div class="main-container">
+        <nav class="nav-bar">
+            <a href="index.html" class="nav-link">← Back to Upload</a>
+        </nav>
+
+        <h1>Transcription View</h1>
+
+        <div class="container">
+            <div class="controls">
+                <button id="copy-btn" class="secondary-btn">Copy to Clipboard</button>
+                <button id="download-btn" class="secondary-btn">Download as Text</button>
+            </div>
+
+            <div class="transcription-container">
+                <div id="transcription-content" class="formatted-text">
+                    <!-- Transcription will be inserted here -->
+                </div>
+            </div>
+
+            <div class="export-options">
+                <h3>Export Format</h3>
+                <select id="export-format">
+                    <option value="plain">Plain Text</option>
+                    <option value="srt">SRT Subtitles</option>
+                    <option value="word">Word Document</option>
+                </select>
+                <button id="export-btn" class="primary-btn">Export</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./functions/utils.js"></script>
+    <script src="./functions/transcription.js"></script>
+</body>
+</html>

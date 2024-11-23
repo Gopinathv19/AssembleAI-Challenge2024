@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Audio Transcription Tool</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
     <div class="main-container">
@@ -15,34 +15,23 @@
             <h2>Upload Audio</h2>
             <div class="upload-wrapper">
                 <input type="file" id="audio-upload" accept="audio/*">
-                <button id="transcribe-btn" class="primary-btn">Transcribe</button>
+                <button id="transcribe-btn" class="primary-btn" disabled>Transcribe</button>
             </div>
-            <div id="upload-status"></div>
+            <div id="upload-status" class="status"></div>
         </div>
 
-        <!-- Transcription Section -->
-        <div id="transcription-section" class="container hidden">
-            <h2>Transcription</h2>
-            <textarea id="transcription-text" readonly></textarea>
-        </div>
-
-        <!-- Speaker Statistics Section -->
-        <div id="speaker-stats-section" class="container hidden">
-            <h2>Speaker Statistics</h2>
-            <div id="speaker-stats"></div>
-            <div class="controls">
-                <button id="rename-speakers-btn" class="secondary-btn">Rename Speakers</button>
+        <!-- Navigation Buttons (hidden initially) -->
+        <div id="nav-buttons" class="container hidden">
+            <h2>Available Analysis</h2>
+            <div class="button-grid">
+                <a href="transcription.html" class="nav-btn">View Transcription</a>
+                <a href="speakers-stats.html" class="nav-btn">Speaker Statistics</a>
+                <a href="audio-sync.html" class="nav-btn">Audio Playback</a>
             </div>
-        </div>
-
-        <!-- Audio Sync Section -->
-        <div id="audio-sync-section" class="container hidden">
-            <h2>Synchronized Playback</h2>
-            <audio id="audio-player" controls></audio>
-            <div id="sync-transcript"></div>
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="./functions/utils.js"></script>
+    <script src="./functions/index.js"></script>
 </body>
 </html>
