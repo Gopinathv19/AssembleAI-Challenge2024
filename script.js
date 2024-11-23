@@ -6,6 +6,8 @@ const DIARIZATION_URL = "http://127.0.0.1:5000/speaker_diarization";
 let globalTranscriptionData = null;
 
 // Utility function to update status with proper styling
+
+// this function is used when the user puts the audio file in the upload section of the html
 function updateStatus(message, type) {
     const statusElement = document.getElementById("upload-status");
     if (!statusElement) return;

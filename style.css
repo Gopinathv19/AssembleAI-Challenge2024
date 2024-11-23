@@ -82,7 +82,7 @@ button:hover {
     opacity: 0.9;
 }
 
-/* Status Styles */
+/* Status Styles   when the js returns the status it changes based on the class it holds*/
 #upload-status {
     margin: 15px 0;
     padding: 15px;
