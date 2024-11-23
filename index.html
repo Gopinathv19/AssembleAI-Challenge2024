@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Transcription Tool</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main-container">
+        <h1>Audio Transcription Tool</h1>
+
+        <!-- Upload Section -->
+        <div class="container upload-section">
+            <h2>Upload Audio</h2>
+            <div class="upload-wrapper">
+                <input type="file" id="audio-upload" accept="audio/*">
+                <button id="transcribe-btn" class="primary-btn">Transcribe</button>
+            </div>
+            <div id="upload-status"></div>
+        </div>
+
+        <!-- Transcription Section -->
+        <div id="transcription-section" class="container hidden">
+            <h2>Transcription</h2>
+            <textarea id="transcription-text" readonly></textarea>
+        </div>
+
+        <!-- Speaker Statistics Section -->
+        <div id="speaker-stats-section" class="container hidden">
+            <h2>Speaker Statistics</h2>
+            <div id="speaker-stats"></div>
+            <div class="controls">
+                <button id="rename-speakers-btn" class="secondary-btn">Rename Speakers</button>
+            </div>
+        </div>
+
+        <!-- Audio Sync Section -->
+        <div id="audio-sync-section" class="container hidden">
+            <h2>Synchronized Playback</h2>
+            <audio id="audio-player" controls></audio>
+            <div id="sync-transcript"></div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
