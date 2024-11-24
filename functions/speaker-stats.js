@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     const data = getProcessedData();
-    if (!data) {
+    if (!data || !data.speaker_stats) {
         window.location.href = 'index.html';
         return;
     }
@@ -14,31 +14,20 @@ function displaySpeakerStats(stats) {
     if (!container) return;
 
     const totalDuration = Object.values(stats)
-        .reduce((sum, s) => sum + s.duration, 0);
+        .reduce((sum, s) => sum + (s.duration || 0), 0);
 
     Object.entries(stats).forEach(([speaker, info]) => {
-        const speakingPercentage = (info.duration / totalDuration * 100).toFixed(1);
+        const speakingPercentage = ((info.duration || 0) / totalDuration * 100).toFixed(1);
         const card = document.createElement('div');
         card.className = 'speaker-card';
         
         card.innerHTML = `
             <h3>${speaker}</h3>
-            <div class="stat-grid">
-                <div class="stat-item">
-                    <span class="stat-label">Words:</span>
-                    <span class="stat-value">${info.word_count}</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Duration:</span>
-                    <span class="stat-value">${info.duration.toFixed(2)}s</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Speaking Time:</span>
-                    <span class="stat-value">${speakingPercentage}%</span>
-                </div>
-                <div class="stat-item">
-                    <span class="stat-label">Confidence:</span>
-                    <span class="stat-value">${(info.confidence * 100).toFixed(1)}%</span>
+            <div class="stats">
+                <p>Speaking Time: ${(info.duration || 0).toFixed(2)}s</p>
+                <p>Percentage: ${speakingPercentage}%</p>
+                <div class="progress-bar">
+                    <div class="progress" style="width: ${speakingPercentage}%"></div>
                 </div>
             </div>
         `;
@@ -51,7 +40,6 @@ function createSpeakingTimeChart(stats) {
     const ctx = document.getElementById('speakingTimeChart');
     if (!ctx) return;
 
-    // Set a fixed size for the chart canvas
     ctx.style.maxWidth = '400px';
     ctx.style.maxHeight = '400px';
     ctx.style.margin = '0 auto';
@@ -61,7 +49,7 @@ function createSpeakingTimeChart(stats) {
         data: {
             labels: Object.keys(stats),
             datasets: [{
-                data: Object.values(stats).map(s => s.duration),
+                data: Object.values(stats).map(s => s.duration || 0),
                 backgroundColor: generateColors(Object.keys(stats).length)
             }]
         },
@@ -79,8 +67,8 @@ function createSpeakingTimeChart(stats) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            const value = context.raw;
-                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const value = context.raw || 0;
+                            const total = context.dataset.data.reduce((a, b) => a + (b || 0), 0);
                             const percentage = ((value / total) * 100).toFixed(1);
                             return `${context.label}: ${percentage}% (${value.toFixed(2)}s)`;
                         }

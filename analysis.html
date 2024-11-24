@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Analysis</title>
+    <link rel="stylesheet" href="./analysis.css">
+</head>
+<body>
+    <div class="main-container">
+        <nav class="nav-bar">
+            <a href="index.html" class="nav-link">← Back to Upload</a>
+        </nav>
+
+        <h1>Advanced Analysis</h1>
+
+        <div class="container analysis-controls">
+            <button id="entities-btn" class="analysis-btn">Named Entities</button>
+            <button id="sentiment-btn" class="analysis-btn">Sentiment Analysis</button>
+            <button id="chapters-btn" class="analysis-btn">Auto Chapters</button>
+            <button id="summary-btn" class="analysis-btn">Summary</button>
+            <button id="categories-btn" class="analysis-btn">Categories</button>
+            <button id="safety-btn" class="analysis-btn">Content Safety</button>
+        </div>
+
+        <div class="container">
+            <!-- Named Entities Section -->
+            <section id="entities-container" class="analysis-section hidden">
+                <h2>Named Entities</h2>
+                <div class="content"></div>
+            </section>
+
+            <!-- Sentiment Analysis Section -->
+            <section id="sentiment-container" class="analysis-section hidden">
+                <h2>Sentiment Analysis</h2>
+                <div class="content"></div>
+            </section>
+
+            <!-- Auto Chapters Section -->
+            <section id="chapters-container" class="analysis-section hidden">
+                <h2>Auto Chapters</h2>
+                <div class="content"></div>
+            </section>
+
+            <!-- Summary Section -->
+            <section id="summary-container" class="analysis-section hidden">
+                <h2>Summary</h2>
+                <div class="content"></div>
+            </section>
+
+            <!-- Categories Section -->
+            <section id="categories-container" class="analysis-section hidden">
+                <h2>Content Categories</h2>
+                <div class="content"></div>
+            </section>
+
+            <!-- Content Safety Section -->
+            <section id="safety-container" class="analysis-section hidden">
+                <h2>Content Safety</h2>
+                <div class="content"></div>
+            </section>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loading-indicator" class="loading-overlay hidden">
+            <div class="loading-spinner"></div>
+            <p>Processing analysis...</p>
+        </div>
+
+        <!-- Error Message Container -->
+        <div id="error-container" class="error-container hidden"></div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="./functions/utils.js"></script>
+    <script src="./functions/analysis.js"></script>
+</body>
+</html>

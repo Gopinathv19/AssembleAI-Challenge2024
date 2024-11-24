@@ -15,19 +15,16 @@
         <h1>Synchronized Audio Playback</h1>
 
         <div class="container">
-            <div class="audio-controls">
+            <div id="audio-container" class="audio-controls">
                 <audio id="audio-player" controls>
                     Your browser does not support the audio element.
                 </audio>
                 
                 <div class="playback-controls">
+                    <button id="backward-btn" class="control-btn">-5s</button>
                     <button id="slow-btn" class="control-btn">0.75x</button>
                     <button id="normal-btn" class="control-btn active">1x</button>
                     <button id="fast-btn" class="control-btn">1.25x</button>
-                </div>
-
-                <div class="time-controls">
-                    <button id="backward-btn" class="control-btn">-5s</button>
                     <button id="forward-btn" class="control-btn">+5s</button>
                 </div>
             </div>
@@ -35,27 +32,30 @@
             <div class="transcript-container">
                 <div class="search-bar">
                     <input type="text" id="search-text" placeholder="Search in transcript...">
-                    <button id="search-btn" class="secondary-btn">Search</button>
+                    <button id="search-btn" class="control-btn">Search</button>
                 </div>
 
-                <div id="sync-transcript" class="scrollable-transcript">
-                    <!-- Transcript content will be inserted here -->
+                <div class="transcript-controls">
+                    <div class="transcript-control-group">
+                        <input type="checkbox" id="auto-scroll" class="transcript-checkbox">
+                        <label for="auto-scroll" class="transcript-control-label">Auto-scroll</label>
+                    </div>
+                    <div class="transcript-control-group">
+                        <input type="checkbox" id="show-timestamps" class="transcript-checkbox">
+                        <label for="show-timestamps" class="transcript-control-label">Show timestamps</label>
+                    </div>
+                    <div class="transcript-control-group">
+                        <input type="checkbox" id="highlight-speakers" class="transcript-checkbox" checked>
+                        <label for="highlight-speakers" class="transcript-control-label">Highlight speakers</label>
+                    </div>
                 </div>
-            </div>
 
-            <div class="display-options">
-                <label>
-                    <input type="checkbox" id="auto-scroll"> Auto-scroll
-                </label>
-                <label>
-                    <input type="checkbox" id="show-timestamps"> Show timestamps
-                </label>
-                <label>
-                    <input type="checkbox" id="highlight-speakers"> Highlight speakers
-                </label>
+                <div id="sync-transcript" class="scrollable-transcript"></div>
             </div>
         </div>
     </div>
+
+    <div id="error-container" class="error-container hidden"></div>
 
     <script src="./functions/utils.js"></script>
     <script src="./functions/audio-sync.js"></script>

@@ -1,3 +1,4 @@
+// this function gets the data from the session storage that is stored on the browser for a period of time
 document.addEventListener('DOMContentLoaded', () => {
     const data = getProcessedData();
     if (!data) {
@@ -13,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Display transcription
     displayTranscription(data.word_data);
 
-    // Copy functionality
+    // Copy button functionality
     copyBtn?.addEventListener('click', async () => {
         try {
             const text = generatePlainText(data.word_data);
@@ -24,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Download functionality
+    // Download button functionality
     downloadBtn?.addEventListener('click', () => {
         try {
             const text = generatePlainText(data.word_data);

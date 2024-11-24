@@ -1,32 +1,49 @@
 document.addEventListener('DOMContentLoaded', () => {
     const data = getProcessedData();
-    if (!data) {
-        window.location.href = 'index.html';
+    if (!data || !data.word_data) {
+        console.error('No transcription data found:', data);
+        showError("No transcription data found");
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 2000);
         return;
     }
 
-    initializeAudioPlayer();
+    console.log('Received word data:', data.word_data[0]);
+
+    const { audioData } = getStoredAudio();
+    if (!audioData) {
+        showError("No audio file found");
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 2000);
+        return;
+    }
+
+    initializeAudioPlayer(audioData);
     setupPlaybackControls();
     setupTranscriptDisplay(data.word_data);
     setupSearchFunctionality();
     setupDisplayOptions();
 });
 
-function initializeAudioPlayer() {
+function initializeAudioPlayer(audioData) {
     const audioPlayer = document.getElementById('audio-player');
     if (!audioPlayer) return;
-
-    const audioData = sessionStorage.getItem('audioData');
-    if (!audioData) {
-        showError('Audio file not found');
-        return;
-    }
 
     if (audioPlayer.src) {
         URL.revokeObjectURL(audioPlayer.src);
     }
     audioPlayer.src = audioData;
     audioPlayer.load();
+
+    // Add timeupdate listener for word synchronization
+    audioPlayer.addEventListener('timeupdate', () => {
+        const container = document.getElementById('sync-transcript');
+        if (container) {
+            updateActiveWord(audioPlayer.currentTime, container);
+        }
+    });
 }
 
 function setupPlaybackControls() {
@@ -40,10 +57,13 @@ function setupPlaybackControls() {
     };
 
     Object.entries(controls).forEach(([id, speed]) => {
-        document.getElementById(id)?.addEventListener('click', () => {
-            audioPlayer.playbackRate = speed;
-            updateActiveSpeedButton(id);
-        });
+        const button = document.getElementById(id);
+        if (button) {
+            button.addEventListener('click', () => {
+                audioPlayer.playbackRate = speed;
+                updateActiveSpeedButton(id);
+            });
+        }
     });
 
     document.getElementById('backward-btn')?.addEventListener('click', () => {
@@ -67,12 +87,18 @@ function updateActiveSpeedButton(activeId) {
 function setupTranscriptDisplay(wordData) {
     const container = document.getElementById('sync-transcript');
     const audioPlayer = document.getElementById('audio-player');
-    if (!container || !audioPlayer) return;
+    if (!container || !audioPlayer || !Array.isArray(wordData)) {
+        console.error('Missing elements or invalid word data');
+        return;
+    }
 
     let currentSpeaker = null;
     container.innerHTML = '';
 
-    wordData.forEach(word => {
+    wordData.forEach((word, index) => {
+        if (!word || !word.text) return;
+
+        // Handle speaker changes
         if (word.speaker !== currentSpeaker) {
             currentSpeaker = word.speaker;
             const speakerLabel = document.createElement('p');
@@ -81,56 +107,170 @@ function setupTranscriptDisplay(wordData) {
             container.appendChild(speakerLabel);
         }
 
+        // Create word span
         const wordSpan = document.createElement('span');
         wordSpan.className = 'word';
-        wordSpan.textContent = `${word.text} `;
-        // Convert timestamps to seconds if they're in milliseconds
-        const startTime = word.start_time / 1000;
-        const endTime = word.end_time / 1000;
+        wordSpan.textContent = word.text + ' ';
+
+        // Process timestamps
+        const startTime = convertToSeconds(word.start_time || word.start);
+        const endTime = convertToSeconds(word.end_time || word.end);
+
         wordSpan.dataset.startTime = startTime.toString();
         wordSpan.dataset.endTime = endTime.toString();
         wordSpan.dataset.speaker = word.speaker;
+        wordSpan.dataset.index = index.toString();
 
-        wordSpan.addEventListener('click', () => {
-            const clickTime = parseFloat(wordSpan.dataset.startTime);
+        // Add formatted timestamp
+        const formattedTime = formatTime(startTime);
+        wordSpan.setAttribute('data-time', formattedTime);
+
+        // Add click handler
+        wordSpan.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const clickTime = parseFloat(this.dataset.startTime);
+            
             if (!isNaN(clickTime)) {
+                // Remove active class from all words
+                container.querySelectorAll('.word').forEach(w => w.classList.remove('active'));
+                
+                // Add active class to clicked word
+                this.classList.add('active');
+                
+                // Set audio time and play
                 audioPlayer.currentTime = clickTime;
                 audioPlayer.play().catch(error => {
                     console.error('Playback failed:', error);
                     showError('Failed to play audio');
                 });
-                // Remove active class from all words and add to clicked word
-                const words = container.getElementsByClassName('word');
-                Array.from(words).forEach(w => w.classList.remove('active'));
-                wordSpan.classList.add('active');
             }
         });
 
         container.appendChild(wordSpan);
     });
+}
 
-    // Setup audio synchronization
-    audioPlayer.addEventListener('timeupdate', () => {
-        const currentTime = audioPlayer.currentTime;
-        const words = container.getElementsByClassName('word');
-        const autoScroll = document.getElementById('auto-scroll')?.checked;
+function convertToSeconds(time) {
+    if (!time) return 0;
+    
+    if (typeof time === 'string') {
+        return parseFloat(time.replace(',', '.'));
+    }
+    // If time is in milliseconds (greater than 1000), convert to seconds
+    if (typeof time === 'number' && time > 1000) {
+        return time / 1000;
+    }
+    return time;
+}
 
-        Array.from(words).forEach(wordSpan => {
-            const startTime = parseFloat(wordSpan.dataset.startTime);
-            const endTime = parseFloat(wordSpan.dataset.endTime);
+function updateActiveWord(currentTime, container) {
+    const words = container.getElementsByClassName('word');
+    const autoScroll = document.getElementById('auto-scroll')?.checked;
+    let activeWordFound = false;
 
-            if (currentTime >= startTime && currentTime <= endTime) {
-                if (!wordSpan.classList.contains('active')) {
-                    wordSpan.classList.add('active');
-                    if (autoScroll) {
-                        ensureWordVisible(wordSpan, container);
-                    }
+    Array.from(words).forEach(word => {
+        const startTime = parseFloat(word.dataset.startTime);
+        const endTime = parseFloat(word.dataset.endTime);
+        
+        if (currentTime >= startTime && currentTime <= endTime) {
+            if (!word.classList.contains('active')) {
+                // Remove active class from all words
+                Array.from(words).forEach(w => w.classList.remove('active'));
+                
+                // Add active class to current word
+                word.classList.add('active');
+                
+                if (autoScroll) {
+                    ensureWordVisible(word, container);
                 }
-            } else {
-                wordSpan.classList.remove('active');
+            }
+            activeWordFound = true;
+        }
+    });
+
+    if (!activeWordFound) {
+        Array.from(words).forEach(w => w.classList.remove('active'));
+    }
+}
+
+function formatTime(timeInSeconds) {
+    if (typeof timeInSeconds !== 'number' || isNaN(timeInSeconds)) {
+        return "0:00";
+    }
+    
+    const minutes = Math.floor(timeInSeconds / 60);
+    const seconds = Math.floor(timeInSeconds % 60);
+    
+    // Return only minutes and seconds in format "M:SS"
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function setupSearchFunctionality() {
+    const searchInput = document.getElementById('search-text');
+    const searchButton = document.getElementById('search-btn');
+    const transcript = document.getElementById('sync-transcript');
+
+    function clearHighlights() {
+        const words = transcript.getElementsByClassName('word');
+        Array.from(words).forEach(word => {
+            word.classList.remove('highlighted');
+        });
+    }
+
+    function performSearch() {
+        const searchTerm = searchInput.value.trim().toLowerCase();
+        clearHighlights();
+        
+        if (!searchTerm) return;
+
+        const words = transcript.getElementsByClassName('word');
+        Array.from(words).forEach(word => {
+            if (word.textContent.toLowerCase().includes(searchTerm)) {
+                word.classList.add('highlighted');
             }
         });
+    }
+
+    // Add event listeners
+    searchButton?.addEventListener('click', performSearch);
+    searchInput?.addEventListener('input', performSearch);
+    searchInput?.addEventListener('change', () => {
+        if (!searchInput.value.trim()) {
+            clearHighlights();
+        }
     });
+}
+
+function setupDisplayOptions() {
+    const transcript = document.getElementById('sync-transcript');
+    
+    // Highlight speakers toggle
+    document.getElementById('highlight-speakers')?.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            transcript.classList.add('highlight-speakers');
+        } else {
+            transcript.classList.remove('highlight-speakers');
+        }
+    });
+
+    // Show timestamps toggle
+    document.getElementById('show-timestamps')?.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            transcript.classList.add('show-timestamps');
+        } else {
+            transcript.classList.remove('show-timestamps');
+        }
+    });
+
+    // Initialize highlight speakers if checked by default
+    if (document.getElementById('highlight-speakers')?.checked) {
+        transcript.classList.add('highlight-speakers');
+    }
+
+    // Initialize show timestamps if checked by default
+    if (document.getElementById('show-timestamps')?.checked) {
+        transcript.classList.add('show-timestamps');
+    }
 }
 
 function ensureWordVisible(wordSpan, container) {
@@ -145,75 +285,7 @@ function ensureWordVisible(wordSpan, container) {
     }
 }
 
-function setupSearchFunctionality() {
-    const searchInput = document.getElementById('search-text');
-    const searchBtn = document.getElementById('search-btn');
-
-    const performSearch = () => {
-        const searchText = searchInput?.value.toLowerCase();
-        if (!searchText) return;
-
-        const words = document.querySelectorAll('.word');
-        let firstMatch = null;
-
-        words.forEach(word => word.classList.remove('highlighted'));
-
-        words.forEach(word => {
-            if (word.textContent.toLowerCase().includes(searchText)) {
-                word.classList.add('highlighted');
-                if (!firstMatch) firstMatch = word;
-            }
-        });
-
-        if (firstMatch) {
-            firstMatch.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-    };
-
-    searchBtn?.addEventListener('click', performSearch);
-    searchInput?.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') performSearch();
-    });
-}
-
-function setupDisplayOptions() {
-    const container = document.getElementById('sync-transcript');
-    if (!container) return;
-    
-    // Show timestamps
-    document.getElementById('show-timestamps')?.addEventListener('change', (e) => {
-        const words = container.getElementsByClassName('word');
-        Array.from(words).forEach(word => {
-            if (e.target.checked) {
-                const startTime = parseFloat(word.dataset.startTime);
-                const formattedTime = formatTime(startTime);
-                word.setAttribute('data-time', formattedTime);
-            } else {
-                word.removeAttribute('data-time');
-            }
-        });
-        container.classList.toggle('show-timestamps', e.target.checked);
-    });
-
-    // Highlight speakers
-    document.getElementById('highlight-speakers')?.addEventListener('change', (e) => {
-        container.classList.toggle('highlight-speakers', e.target.checked);
-    });
-
-    // Auto-scroll
-    document.getElementById('auto-scroll')?.addEventListener('change', (e) => {
-        container.classList.toggle('auto-scroll', e.target.checked);
-    });
-}
-
-function formatTime(timeInSeconds) {
-    const minutes = Math.floor(timeInSeconds / 60);
-    const seconds = Math.floor(timeInSeconds % 60);
-    const milliseconds = Math.floor((timeInSeconds % 1) * 1000);
-    return `${minutes}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
-}
-
-// Keyboard shortcuts
+ 
 document.addEventListener('keydown', (e) => {
     const audioPlayer = document.getElementById('audio-player');
     if (!audioPlayer) return;
@@ -242,3 +314,14 @@ document.addEventListener('keydown', (e) => {
             break;
     }
 });
+
+function showError(message) {
+    const errorContainer = document.getElementById('error-container');
+    if (errorContainer) {
+        errorContainer.textContent = message;
+        errorContainer.classList.remove('hidden');
+        setTimeout(() => {
+            errorContainer.classList.add('hidden');
+        }, 3000);
+    }
+}
